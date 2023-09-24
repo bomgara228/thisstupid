@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSockets</title>
+</head>
+<body>
+    <script>
+        function rerenderPrice(price){
+            const priceDom =  document.querySelector('#dollar-price');
+            const diffDom = document.querySelector('.dollar-dif');
+
+            price.innerHTML = `${price}$`;
+            priceDom.style.color = price >= previousPrice ? 'red' : 'green';
+            const dollarDif = price - previousPrice;
+            diffDom.innerHTML = `${dollarDif >= 0 ? `+${dollarDif}` : `${dollarDif}`}$`;
+            console.log(price >= previousPrice);
+        }
+        let previousPrice = null;
+        function startWebsocket(){
+
+        
+        const socket = new WebSocket('ws:/localgost:3000/nalog');
+        socket.onopen = function() {
+            console.log(`I've connected`);
+        };
+
+        socket.onmessage = function(message){
+            const {data} = message;
+            const price = Number(data);
+            previousPrice = price;
+            
+            document.querySelector('#dollar-price').innerHTML = `${price}$`
+        };
+
+        socket.close = function(){
+            console.log(`socket closed`);
+        };
+
+        socket.onerror = function(error){
+            console.log(error)
+        };
+    }
+    </script>
+    <button onclick="startWebsocket()">Connect to WebSocket Server</button>
+    <h2>Current dollar price:</h2>
+    <h3 id="dollar-price">N/A</h3>
+    <h5 class="dollar-dif">N/A</h5>
+</body>
+</html>
